@@ -167,3 +167,14 @@ a.article:hover {
         display: none;
     }
 }
+
+
+::-moz-selection { /* Code for Firefox */
+    color: rgb(251, 251, 251);
+    background: rgb(34, 188, 96);
+  }
+  
+  ::selection {
+    color: rgb(251, 251, 251);
+    background: rgb(34, 188, 96);
+  }
