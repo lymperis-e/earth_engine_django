@@ -59,8 +59,8 @@ def color_composites(aoi, year) -> dict:
     Compute True & False color composites for the
     day with the minimum cloud coverage of the year
     '''
-    L8  = start_gee_service(aoi, year)[0]
-    roi = start_gee_service(aoi, year)[1]
+    L8  = start_gee_service(aoi, year)['L8']
+    roi = start_gee_service(aoi, year)['roi']
 
     # Sort by Cloud Coverage
     sortedByCloud = ee.ImageCollection(L8.sort('CLOUD_COVER'))
@@ -76,18 +76,16 @@ def color_composites(aoi, year) -> dict:
     minCloud_TC_tiles = ee.Image(minCloud).getMapId({ 'bands': ['B4', 'B3', 'B2'], 'max':  25000, 'gamma': [0.95, 1.1, 1] } )   #ee.Image({sorter}).getMapId({visParams})
     minCloud_FC_tiles = ee.Image(minCloud).getMapId({ 'bands': ['B5', 'B4', 'B3'], 'max':  22000, 'gamma': [0.95, 1.1, 1] } )
 
-    result = {
+    return {
         'min_cloud_tc': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: True Color Composite',
+            'label': 'True Color Composite',
             'url': minCloud_TC_tiles['mapid']
         },
         'min_cloud_fc': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: False Color Composite',
+            'label': 'False Color Composite',
             'url': minCloud_FC_tiles['mapid']
         }
     }
-    print(result)
-    return result
 
 def min_cloud_ndvi (aoi, year):
     '''
@@ -117,7 +115,7 @@ def min_cloud_ndvi (aoi, year):
 
 def max_veg_indeces(aoi, year):
     '''
-    Compute the maximum values of 3 common vegetation indices:
+    Compute the maximum values of 3 common indices:
     NDVI, EVI, NDWI
     '''
     L8  = start_gee_service(aoi, year)['L8']
@@ -157,8 +155,8 @@ def doy_max_veg(aoi, year):
     Compute the Day Of the Year (DOY) on which the
     maximum values of NDVI, EVI & NDWI occured
     '''
-    L8  = start_gee_service(aoi, year)[0]
-    roi = start_gee_service(aoi, year)[1]
+    L8  = start_gee_service(aoi, year)['L8']
+    roi = start_gee_service(aoi, year)['roi']
 
     # Map NDVI, NDWI & EVI computation functions over the whole time series
     NDVI = L8.map(computeNDVI)
@@ -229,7 +227,10 @@ def start_gee_service(aoi, year):
     L8.map(ee.Algorithms.Landsat.TOA)
 
 
-    return L8, roi 
+    return {
+            'L8': L8,
+            'roi': roi
+            } 
 
 
 

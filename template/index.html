@@ -16,12 +16,9 @@
     <link rel="stylesheet" href="{% static '/style.css'%}">
 
     <!-- Font Awesome JS -->
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
-        integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
-        crossorigin="anonymous"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
-        integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
-        crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" integrity="sha512-Tn2m0TIpgVyTzzvmxLNuqbSJH3JP8jm+Cy3hvHrW7ndTDcJ1w5mBiksqDBb8GpE2ksktFvDB/ykZ0mDpsZj20w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
     <style>
         #map {
@@ -62,7 +59,7 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <h3>Earth Engine App</h3>
-                <h6 style="color:bisque">Landsat-8 Yearly Image Analysis</h6>
+                <h6 style="color:bisque">Landsat-8 Vegetation Analysis</h6>
             </div>
 
             <ul class="list-unstyled components">
@@ -189,15 +186,7 @@
             
 
 
-            const hum_osm = L.tileLayer(
-                "http://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                {
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                    maxZoom: 26,
-                    maxNativeZoom: 20,
-                }
-            );
+            
             const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 attribution:
                     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -238,6 +227,15 @@
                         'ESRI Topo Map <a href="https://esri.maps.arcgis.com/home/index.html" target="_blank">(c) Esri, Maxar, Earthstar Geographics, USDA FSA, USGS, Aerogrid, IGN, IGP, and the GIS User Community</a>',
                     maxZoom: 26,
                     maxNativeZoom: 16,
+                }
+            );
+            const hum_osm = L.tileLayer(
+                "http://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    maxZoom: 26,
+                    maxNativeZoom: 20,
                 }
             );
 
@@ -285,14 +283,15 @@
                                             <input type="text" class="yearpicker form-control" value="" style="font-size: x-small;width: 60px;height: 20px;">
                                         </div>
                                         <div class='row' style='justify-content: center;'>
-                                            <button class="btn btn-sm" onclick='eeMap(${JSON.stringify(feature)})'>
-                                                <i class="fa-solid fa-satellite"></i>&nbsp;&nbsp; Earth Engine Data
+                                            <button class="btn btn-sm" onclick='openMap(${JSON.stringify(feature)})'>
+                                                <i class="fas fa-satellite"></i>&nbsp;&nbsp; Earth Engine Data
                                             </button>
                                         </div>
                                     `)
                                 /* Handle Year Picking*/
                                 popup.on('add', function(){
-                                $(".yearpicker").yearpicker({
+                                $(".yearpicker").yearpicker({   
+                                                                startYear: new Date(2013),
                                                                 endYear : new Date().getFullYear(),
                                                                 onChange: function (value) {
                                                                     year = value
@@ -319,7 +318,7 @@
 
 
 
-            function eeMap(geojson) {
+            function openMap(geojson) {
                 payload = { "aoi": geojson, "year":year }
 
 

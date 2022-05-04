@@ -44,6 +44,8 @@ def asyncEE(request):
         # Check what layers were requested
         if layers == 'composites':
             gee_data = color_composites(aoi, year)
+        elif layers == 'min_cloud_ndvi':
+            gee_data = min_cloud_ndvi(aoi, year)
         elif layers == 'max_veg':
             gee_data = max_veg_indeces(aoi, year)
         elif layers == 'doy_max_veg':
