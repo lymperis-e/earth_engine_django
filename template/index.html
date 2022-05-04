@@ -62,6 +62,7 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <h3>Earth Engine App</h3>
+                <h6 style="color:bisque">Landsat-8 Yearly Image Analysis</h6>
             </div>
 
             <ul class="list-unstyled components">
@@ -148,6 +149,11 @@
             integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
             crossorigin="anonymous"></script>
 
+        <!--Year Picker-->
+        <link rel="stylesheet" href="{% static '/yearpicker/yearpicker.css'%}" />
+        <script src="{% static '/yearpicker/yearpicker.js'%}"></script>
+
+
         <script type="text/javascript">
             $(document).ready(function () {
                 $('#sidebarCollapse').on('click', function () {
@@ -157,6 +163,7 @@
         </script>
 
         <script>
+            let year = 2021
             /* Initialize Map*/
             var map = L.map(
                 "map-container",
@@ -165,7 +172,6 @@
                     crs: L.CRS.EPSG3857,
                     zoom: 7,
                     zoomControl: false,
-
                     preferCanvas: false,
                 }
             )
@@ -259,7 +265,7 @@
                 .addTo(map);
 
 
-            
+
 
             addToSidebar(layerControl, "layer-control-container")
 
@@ -270,16 +276,30 @@
                     map.fire("dataload")
                     L.geoJSON(data, {
                         onEachFeature: function (feature, layer) {
-                            layer.bindPopup(`
-                        <h4>Δήμος ${feature.properties.NAME}</h4>
-                            <div class='row' style='justify-content: center;'>
-                                <button class="btn btn-sm" onclick='eeMap(${JSON.stringify(feature)})'>
-                                    <i class="fa-solid fa-satellite"></i>&nbsp;&nbsp; Earth Engine Data
-                                </button>
-                            </div>
-                        `);
+                            let popup = L.popup()
+                                        .setContent(`
+                                    <h4>Δήμος ${feature.properties.NAME}</h4>
+                                    <div class='row' style='justify-content: center;margin-top: 10px;'>
+                                            <h6>Year:&#x20;&#x20;</h6>
+                                            <input type="text" class="yearpicker form-control" value="" style="font-size: x-small;width: 60px;height: 20px;">
+                                        </div>
+                                        <div class='row' style='justify-content: center;'>
+                                            <button class="btn btn-sm" onclick='eeMap(${JSON.stringify(feature)})'>
+                                                <i class="fa-solid fa-satellite"></i>&nbsp;&nbsp; Earth Engine Data
+                                            </button>
+                                        </div>
+                                    `)
+                                /* Handle Year Picking*/
+                                popup.on('add', function(){
+                                $(".yearpicker").yearpicker({
+                                onChange: function (value) {
+                                    year = value
+                                }
+                            });
+                            })
+                            layer.bindPopup(popup);
+
                             let color = Math.floor(Math.random() * 16777215).toString(16)
-                            console.log(feature)
                             layer.setStyle({
                                 weight: 0.6,
                                 fill: true,
@@ -297,41 +317,41 @@
 
 
 
-                    function eeMap(geojson) {
-                        payload = { "aoi": geojson }
+            function eeMap(geojson) {
+                payload = { "aoi": geojson }
 
 
-                        var form = document.createElement('form');
-                        form.style.visibility = 'hidden';
-                        form.method = 'POST';
-                        form.action = "{% url 'map'  %}";
+                var form = document.createElement('form');
+                form.style.visibility = 'hidden';
+                form.method = 'POST';
+                form.action = "{% url 'map'  %}";
 
 
-                        var input = document.createElement('input');
-                        input.name = 'data';
-                        input.value = JSON.stringify(payload);
-                        form.appendChild(input)
+                var input = document.createElement('input');
+                input.name = 'data';
+                input.value = JSON.stringify(payload);
+                form.appendChild(input)
 
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-
-
-
+                document.body.appendChild(form);
+                form.submit();
+            }
 
 
 
 
-                        function addToSidebar(leafletControl, parentElementId) {
-                            let htmlObject = leafletControl.getContainer().children[1];
-                            let oldParent = htmlObject.parentElement
-                            let a = document.getElementById(parentElementId);
-                            function setParent(el, newParent) {
-                                newParent.appendChild(el);
-                            }
-                            setParent(htmlObject, a);
-                            oldParent.remove()
-                        }
+
+
+
+            function addToSidebar(leafletControl, parentElementId) {
+                let htmlObject = leafletControl.getContainer().children[1];
+                let oldParent = htmlObject.parentElement
+                let a = document.getElementById(parentElementId);
+                function setParent(el, newParent) {
+                    newParent.appendChild(el);
+                }
+                setParent(htmlObject, a);
+                oldParent.remove()
+            }
         </script>
 </body>
 

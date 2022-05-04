@@ -34,14 +34,9 @@ def asyncEE(request):
     '''Request and return data asynchronously,
     so as to allow new request to the GEE API 
     without reloading the web page'''
-
-    if request.method == 'GET':     #Default first time loading of the page
-        gee_data = start_gee_service()
-        return JsonResponse(gee_data)
-
-    elif request.method == 'POST':      # Async data loading with custom params
+    if request.method == 'POST':      # Async data loading with custom params
         data =  json.loads(request.body.decode("utf-8"))
-        gee_data = start_gee_service(data)
+        gee_data = start_gee_service(data, year='2021')
         return JsonResponse(gee_data)
 
 

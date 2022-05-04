@@ -55,7 +55,7 @@ def addDate(image):
 
 
 
-def start_gee_service(geojson):
+def start_gee_service(geojson, year):
     ''' 
     Returns a dict with different layers produced by Earth Engine.
     Each layer carries two attributes: label & url
@@ -73,7 +73,7 @@ def start_gee_service(geojson):
 
     L8 = (ee.ImageCollection("LANDSAT/LC08/C02/T1")
 
-          .filter(ee.Filter.date('2021-01-01', '2021-12-31'))
+          .filter(ee.Filter.date('{}-01-01'.format(year), '{}-12-31'.format(year)))
             .filter(ee.Filter.lt('CLOUD_COVER', 20))
           .filterBounds(roi)
 
