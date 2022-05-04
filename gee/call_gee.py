@@ -9,6 +9,9 @@ credentials =   credentials
 ee.Initialize(credentials)
 
 
+#def pixelValue(image, band,  x, y):
+#    geom = ee.Geometry.Point(x, y)
+
 
 def mean_stddev(image, band):
     '''
