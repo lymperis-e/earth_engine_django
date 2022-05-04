@@ -74,7 +74,11 @@
                     container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control-layer-container leaflet-bar');
                 }
                 this._indicatorContainer = container;
-                this._indicator = L.DomUtil.create('a', classes, container);
+                //this._indicator = L.DomUtil.create('a', classes, container);
+                this._indicator = document.createElement('img') 
+                this._indicator.src = '/static/img/eclipse_loader.svg'
+                this._indicator.classList.add(classes)
+                container.appendChild(this._indicator)
                 if (this.options.spinjs) {
                     this._spinner = new Spinner(this.options.spin).spin();
                     this._indicator.appendChild(this._spinner.el);

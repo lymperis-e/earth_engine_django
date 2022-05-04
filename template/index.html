@@ -131,6 +131,8 @@
                     <i class="fas fa-align-left"></i>
                     <span></span>
                 </button>
+                <div style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 50px;" id="loader-container">
+                </div>
 
                 <div class="" id="map-container"></div>
             </div>
@@ -180,9 +182,11 @@
                 position: 'topright'
             }).addTo(map);
 
-            var loader = new L.Control.loading({
-                position: 'topright'
+            var loader = L.Control.loading({
+                position: 'topright',
             }).addTo(map)
+            switchControlParent(loader, 'loader-container', 0)
+            
 
 
             const hum_osm = L.tileLayer(
@@ -267,7 +271,7 @@
 
 
 
-            addToSidebar(layerControl, "layer-control-container")
+            switchControlParent(layerControl, "layer-control-container", 1)
 
             map.fire("dataloading")
             fetch("https://geodata.gov.gr/geoserver/ows/?service=WFS&request=GetFeature&typeName=geodata.gov.gr:c7b5978b-aca9-4d74-b8a5-d3a48d02f6d0&outputFormat=application/json&srsName=epsg:4326")
@@ -342,8 +346,8 @@
 
 
 
-            function addToSidebar(leafletControl, parentElementId) {
-                let htmlObject = leafletControl.getContainer().children[1];
+            function switchControlParent(leafletControl, parentElementId, elementPosition) {
+                let htmlObject = leafletControl.getContainer().children[elementPosition];
                 let oldParent = htmlObject.parentElement
                 let a = document.getElementById(parentElementId);
                 function setParent(el, newParent) {

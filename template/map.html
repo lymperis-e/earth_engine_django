@@ -65,7 +65,7 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <h3><i class="fa-solid fa-earth-europe"></i>Earth Engine App</h3>
-                <h6 style="color:bisque">Landsat-8 Yearly Image Analysis</h6>
+                <h6 style="color:bisque">Landsat-8 Yearly Image Analysis - <span style="color:teal">2021</span></h6>
             </div>
             
             <div>
@@ -139,6 +139,11 @@
                     <i class="fas fa-align-left"></i>
                     <span></span>
                 </button>
+                <div style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 50px;" id="loader-container">
+                </div>
+                <div style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 50px;" id="loading-container">
+                    <img src="/static/img/eclipse_loader.svg" height="40">
+                </div>
 
                 <div class="" id="map-container"></div>
             </div>
@@ -187,10 +192,11 @@
             zoomControl.getContainer().children[1].classList.add("btn");
 
 
-            var loader = new L.Control.loading({
+            var loader =  L.Control.loading({
                 position: 'topright',
                 //zoomControl: true
             }).addTo(map)
+            switchControlParent(loader, 'loader-container', 0)
 
             /* Basemap Layers */
             const baseTree = {
@@ -247,7 +253,7 @@
                             spaceSymbol: "   ",
                         })
                         .addTo(map);
-            addToSidebar(layerControl, "layer-control-container")
+            switchControlParent(layerControl, "layer-control-container", 1)
             }
             
 
@@ -306,8 +312,8 @@
 
 
 
-            function addToSidebar(leafletControl, parentElementId) {
-                let htmlObject = leafletControl.getContainer().children[1];
+            function switchControlParent(leafletControl, parentElementId, elementPosition) {
+                let htmlObject = leafletControl.getContainer().children[elementPosition];
                 let oldParent = htmlObject.parentElement
                 let a = document.getElementById(parentElementId);
                 function setParent(el, newParent) {
