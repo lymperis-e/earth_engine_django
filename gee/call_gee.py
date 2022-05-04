@@ -10,7 +10,17 @@ ee.Initialize(credentials)
 
 
 
-
+def mean_stddev(image, band):
+    '''
+    Calculate the mean & standard dev for an
+    ee.Image and return it, for display and 
+    visual parameter setting
+    '''
+    stdDev = image.select(band).reduceRegion(ee.Reducer.stdDev()).getInfo()[band]
+    mean = image.select(band).reduceRegion(ee.Reducer.mean()).getInfo()[band]
+    print("Std Dev {} : ".format(band), stdDev)
+    print("Mean {} : ".format(band), mean)
+    return {'mean': mean, 'stddev': stdDev}
 
 def computeNDVI(image) :
     '''
@@ -103,7 +113,12 @@ def min_cloud_ndvi (aoi, year):
 
     # Compute NDVI for the day with the minimum cloud cover
     minCloud_NDVI = computeNDVI(minCloud)
-    minCloud_NDVI_tiles = ee.Image(minCloud_NDVI).getMapId({'bands':['ndvi'], 'max': 0.54, 'min': -0.1, 'palette': ['red','green']})
+
+    # Calculate mean & stddev, to set the visualisation parameters 
+    mean = mean_stddev(minCloud_NDVI, 'ndvi')['mean']
+    stdDev = mean_stddev(minCloud_NDVI, 'ndvi')['stddev']
+
+    minCloud_NDVI_tiles = ee.Image(minCloud_NDVI).getMapId({'bands':['ndvi'], 'max': (mean+2*stdDev), 'min':  (mean-2*stdDev), 'palette': ['red','green']})
 
     return {
         'min_cloud_ndvi': {

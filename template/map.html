@@ -246,7 +246,6 @@
                         
                         let eeData = data
 
-                        cnt = 0
                         for (var l of Object.keys(eeData)) {
                             let eeLayer = eeData[l]
 
@@ -256,13 +255,11 @@
                                 { "attribution": "Google Earth Engine", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false }
                             ).addTo(map);
                             overlaysTree.children.push({ label: layer_HTMLtag, layer: leafLayer });
-                            cnt++
                         }
 
                         layerControl.setOverlayTree(overlaysTree)
                         /* Add layer count badge */
-                        document.getElementById('overlays-count').innerHTML = `Earth Engine Layers&#x20; <span class="badge bg-success">${cnt}</span>`
-                        
+                        document.getElementById('overlays-count').innerHTML = `Earth Engine Layers&#x20; <span class="badge bg-success">${Object.keys(overlaysTree).length}</span>`
                         
                         map.fire("dataload") //Hide loader
                         document.getElementById('loading-container').style.display = 'none'
