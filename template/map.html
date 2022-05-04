@@ -65,7 +65,7 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <h3><i class="fa-solid fa-earth-europe"></i>Earth Engine App</h3>
-                <h6 style="color:bisque">Landsat-8 Yearly Image Analysis - <span style="color:teal">2021</span></h6>
+                <h6 style="color:bisque">Landsat-8 Yearly Image Analysis - <span style="color:teal" id="title-year">2021</span></h6>
             </div>
             
             <div>
@@ -73,27 +73,30 @@
             </div>
 
             <ul class="list-unstyled components">
+                <h6 style="margin-left:10px;"> Map Layers</h6>
                 <div id="layer-control-container" style="font-size: small;
                 margin-left:10px;">
                 </div>
             </ul>
 
-            <!--ul class="list-unstyled components">
+            <ul class="list-unstyled components">
                 <li class="active">
-                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>
+                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> Calculate</a>
                     <ul class="collapse list-unstyled" id="homeSubmenu">
                         <li>
-                            <a href="#">Home 1</a>
+                            <a href="#">NDVI on least cloudy day </a>
                         </li>
                         <li>
-                            <a href="#">Home 2</a>
+                            <a href="#"> Max NDVI, EVI, NDWI values of the year, per pixel</a>
                         </li>
                         <li>
-                            <a href="#">Home 3</a>
+                            <a href="#"> Day of the year (DOY) of NDVI, EVI, NDWI maximum occurence, per pixel</a>
                         </li>
                     </ul>
                 </li>
-                <li>
+            </ul>
+
+                <!--li>
                     <a href="#">About</a>
                 </li>
                 <li>
@@ -171,6 +174,9 @@
         </script>
 
         <script>
+
+            document.getElementById('title-year').innerHTML = JSON.parse('{{ year | safe }}')
+
             /* Initialize Map*/
             var map = L.map(
                 "map-container",
@@ -257,22 +263,23 @@
             }
             
 
-            /* Get the EE layers */
-            fetchEE()
+            /* Get the first EE layers: True and False color composites */
+            fetchEE('composites')
 
 
 
-            function fetchEE() {
+            function fetchEE(layers) {
                 /* Get the EE layers from the backend an append them to the map*/
-                let payload = JSON.parse('{{ feature | safe }}')
-                console.log(payload)
-                map.fitBounds(L.geoJSON(payload).getBounds())
+                let aoi = JSON.parse('{{ feature | safe }}')
+                let year = JSON.parse('{{ year | safe }}')
+                //console.log(year)
+                map.fitBounds(L.geoJSON(aoi).getBounds())
 
                 map.fire("dataloading")  // Show loader
                 fetch("{% url 'asyncEE'  %}", {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ "aoi": payload }),
+                    body: JSON.stringify({ "aoi": aoi, "year": year, "layers": layers}),
                 })
                     .then(response => response.json())
                     .then(data => {

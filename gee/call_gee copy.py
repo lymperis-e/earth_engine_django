@@ -54,158 +54,11 @@ def addDate(image):
 
 
 
-def color_composites(aoi, year) -> dict:
-    '''
-    Compute True & False color composites for the
-    day with the minimum cloud coverage of the year
-    '''
-    L8  = start_gee_service(aoi, year)[0]
-    roi = start_gee_service(aoi, year)[1]
-
-    # Sort by Cloud Coverage
-    sortedByCloud = ee.ImageCollection(L8.sort('CLOUD_COVER'))
-
-    # Select the image with the maximum cloud coverage
-    max_cloud = L8.aggregate_max('CLOUD_COVER')
-    print('Max Cloud ::', max_cloud.getInfo())
-   
-    # Select the image with the minimum cloud coverage
-    minCloud = (sortedByCloud.first().clip(roi))
-
-    # Create True & False color composites
-    minCloud_TC_tiles = ee.Image(minCloud).getMapId({ 'bands': ['B4', 'B3', 'B2'], 'max':  25000, 'gamma': [0.95, 1.1, 1] } )   #ee.Image({sorter}).getMapId({visParams})
-    minCloud_FC_tiles = ee.Image(minCloud).getMapId({ 'bands': ['B5', 'B4', 'B3'], 'max':  22000, 'gamma': [0.95, 1.1, 1] } )
-
-    result = {
-        'min_cloud_tc': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: True Color Composite',
-            'url': minCloud_TC_tiles['mapid']
-        },
-        'min_cloud_fc': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: False Color Composite',
-            'url': minCloud_FC_tiles['mapid']
-        }
-    }
-    print(result)
-    return result
-
-def min_cloud_ndvi (aoi, year):
-    '''
-    Compute the NDVI for the day with the minimum
-    cloud coverage of the year
-    '''
-    L8  = start_gee_service(aoi, year)['L8']
-    roi = start_gee_service(aoi, year)['roi']
-
-    # Sort by Cloud Coverage
-    sortedByCloud = ee.ImageCollection(L8.sort('CLOUD_COVER'))
-
-    # Select the image with the minimum cloud coverage
-    minCloud = (sortedByCloud.first().clip(roi))
-
-    # Compute NDVI for the day with the minimum cloud cover
-    minCloud_NDVI = computeNDVI(minCloud)
-    minCloud_NDVI_tiles = ee.Image(minCloud_NDVI).getMapId({'bands':['ndvi'], 'max': 0.54, 'min': -0.1, 'palette': ['red','green']})
-
-    return {
-        'min_cloud_ndvi': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: NDVI',
-            'url': minCloud_NDVI_tiles['mapid']
-        }
-    }
-
-
-def max_veg_indeces(aoi, year):
-    '''
-    Compute the maximum values of 3 common vegetation indices:
-    NDVI, EVI, NDWI
-    '''
-    L8  = start_gee_service(aoi, year)['L8']
-    roi = start_gee_service(aoi, year)['roi']
-
-    # Map NDVI, NDWI & EVI computation functions over the whole time series
-    NDVI = L8.map(computeNDVI)
-    EVI  = L8.map(computeEVI)
-    NDWI = L8.map(computeNDWI)
-    
-    #Calculate max NDVI/EVI/NDWI per pixel in the time series, via temporal reduction
-    maxNDVI = NDVI.reduce(ee.Reducer.max())
-    maxEVI  = EVI.reduce(ee.Reducer.max())
-    maxNDWI = NDWI.reduce(ee.Reducer.max())
-
-    maxNDVI_tiles = ee.Image(maxNDVI).getMapId({'bands':['ndvi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})    
-    maxEVI_tiles  = ee.Image(maxEVI).getMapId({'bands':['evi_max'],   'max': -0.5, 'min': 1, 'palette': ['red','green']})
-    maxNDWI_tiles = ee.Image(maxNDWI).getMapId({'bands':['ndwi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})
-
-    return {
-        'max_ndvi': {
-            'label': 'Max NDVI/pixel ',
-            'url': maxNDVI_tiles['mapid']
-        },
-        'max_evi': {
-            'label': 'Max EVI/pixel ',
-            'url': maxEVI_tiles['mapid']
-        },
-        'max_ndwi': {
-            'label': 'Max NDWI/pixel ',
-            'url': maxNDWI_tiles['mapid']
-        },
-    }
-
-def doy_max_veg(aoi, year):
-    '''
-    Compute the Day Of the Year (DOY) on which the
-    maximum values of NDVI, EVI & NDWI occured
-    '''
-    L8  = start_gee_service(aoi, year)[0]
-    roi = start_gee_service(aoi, year)[1]
-
-    # Map NDVI, NDWI & EVI computation functions over the whole time series
-    NDVI = L8.map(computeNDVI)
-    EVI  = L8.map(computeEVI)
-    NDWI = L8.map(computeNDWI)
-    
-    #Calculate max NDVI/EVI/NDWI per pixel in the time series, via temporal reduction
-    maxNDVI = NDVI.reduce(ee.Reducer.max())
-    maxEVI  = EVI.reduce(ee.Reducer.max())
-    maxNDWI = NDWI.reduce(ee.Reducer.max())
-
-    # Map the NDVI ImageCollection to addDate, then temporally reduce it.
-    # As the images in the collection only have one band, we can use
-    # 'qualityMosaic' equivalently to 'Reducer.max'. We opt for it for
-    # demonstrative purposes. Do the same with EVI, NDWI
-    DoyMaxNdvi = NDVI.map(addDate).qualityMosaic('ndvi').select('DOY')
-    DoyMaxEvi = EVI.map(addDate).qualityMosaic('evi').select('DOY')
-    DoyMaxNdwi = NDWI.map(addDate).qualityMosaic('ndwi').select('DOY')
-
-  
-    DoyMaxNdvi = ee.Image(DoyMaxNdvi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
-    DoyMaxEvi  = ee.Image(DoyMaxEvi).getMapId({'bands':['DOY'],   'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
-    DoyMaxNdwi = ee.Image(DoyMaxNdwi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
-
-    return {
-        'doy_max_ndvi' :{
-            'label':'Max NDVI: Day-of-Year',
-            'url'  : DoyMaxNdvi['mapid']
-        },
-        'doy_max_evi' :{
-            'label':'Max EVI: Day-of-Year',
-            'url'  : DoyMaxEvi['mapid']
-        },
-        'doy_max_ndwi' :{
-            'label':'Max NDWI: Day-of-Year',
-            'url'  : DoyMaxNdwi['mapid']
-        }
-    }
-
-
-
 
 def start_gee_service(aoi, year):
     ''' 
-    Authenticate against EE with a Service Account,
-    Initialize an EE server-side script and return the 
-    client-side objects for different evaluation methods
+    Returns a dict with different layers produced by Earth Engine.
+    Each layer carries two attributes: label & url
     '''
 
     title = aoi['properties']['NAME']
@@ -228,21 +81,53 @@ def start_gee_service(aoi, year):
     L8.map(ee.Algorithms.Landsat.calibratedRadiance)
     L8.map(ee.Algorithms.Landsat.TOA)
 
+    # Sort by Cloud Coverage
+    sortedByCloud = ee.ImageCollection(L8.sort('CLOUD_COVER'))
 
-    return L8, roi 
+    # Select the image with the maximum cloud coverage
+    max_cloud = L8.aggregate_max('CLOUD_COVER')
+    print('Max Cloud ::', max_cloud.getInfo())
+   
+    # Select the image with the minimum cloud coverage
+    minCloud = (sortedByCloud.first().clip(roi))
 
+    # Create True & False color composites
+    minCloud_TC_tiles = ee.Image(minCloud).getMapId({ 'bands': ['B4', 'B3', 'B2'], 'max':  25000, 'gamma': [0.95, 1.1, 1] } )   #ee.Image({sorter}).getMapId({visParams})
+    minCloud_FC_tiles = ee.Image(minCloud).getMapId({ 'bands': ['B5', 'B4', 'B3'], 'max':  22000, 'gamma': [0.95, 1.1, 1] } )
 
+    # Compute NDVI for the day with the minimum cloud cover
+    minCloud_NDVI = computeNDVI(minCloud)
+    minCloud_NDVI_tiles = ee.Image(minCloud_NDVI).getMapId({'bands':['ndvi'], 'max': 0.54, 'min': -0.1, 'palette': ['red','green']})
 
-
-
-
-
-
-
-
-
+    # Map NDVI, NDWI & EVI computation functions over the whole time series
+    NDVI = L8.map(computeNDVI)
+    EVI  = L8.map(computeEVI)
+    NDWI = L8.map(computeNDWI)
     
-    
+    #Calculate max NDVI/EVI/NDWI per pixel in the time series, via temporal reduction
+    maxNDVI = NDVI.reduce(ee.Reducer.max())
+    maxEVI  = EVI.reduce(ee.Reducer.max())
+    maxNDWI = NDWI.reduce(ee.Reducer.max())
+
+    maxNDVI_tiles = ee.Image(maxNDVI).getMapId({'bands':['ndvi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})    
+    maxEVI_tiles  = ee.Image(maxEVI).getMapId({'bands':['evi_max'],   'max': -0.5, 'min': 1, 'palette': ['red','green']})
+    maxNDWI_tiles = ee.Image(maxNDWI).getMapId({'bands':['ndwi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})
+
+
+    # Map the NDVI ImageCollection to addDate, then temporally reduce it.
+    # As the images in the collection only have one band, we can use
+    # 'qualityMosaic' equivalently to 'Reducer.max'. We opt for it for
+    # demonstrative purposes. Do the same with EVI, NDWI
+    DoyMaxNdvi = NDVI.map(addDate).qualityMosaic('ndvi').select('DOY')
+    DoyMaxEvi = EVI.map(addDate).qualityMosaic('evi').select('DOY')
+    DoyMaxNdwi = NDWI.map(addDate).qualityMosaic('ndwi').select('DOY')
+
+  
+    DoyMaxNdvi = ee.Image(DoyMaxNdvi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+    DoyMaxEvi  = ee.Image(DoyMaxEvi).getMapId({'bands':['DOY'],   'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+    DoyMaxNdwi = ee.Image(DoyMaxNdwi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+
+
 
     return {
         'min_cloud_tc': {

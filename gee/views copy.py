@@ -39,17 +39,7 @@ def asyncEE(request):
         data =  json.loads(request.body.decode("utf-8"))
         aoi = data['aoi']
         year = data['year']
-        layers = data['layers']
-
-        # Check what layers were requested
-        if layers == 'composites':
-            gee_data = color_composites(aoi, year)
-        elif layers == 'max_veg':
-            gee_data = max_veg_indeces(aoi, year)
-        elif layers == 'doy_max_veg':
-            gee_data = doy_max_veg(aoi, year)
-
-        
+        gee_data = start_gee_service(aoi, year)
         return JsonResponse(gee_data)
 
 

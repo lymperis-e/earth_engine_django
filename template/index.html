@@ -293,11 +293,12 @@
                                 /* Handle Year Picking*/
                                 popup.on('add', function(){
                                 $(".yearpicker").yearpicker({
-                                onChange: function (value) {
-                                    year = value
-                                }
-                            });
-                            })
+                                                                endYear : new Date().getFullYear(),
+                                                                onChange: function (value) {
+                                                                    year = value
+                                                                }
+                                                            });
+                                                        })
                             layer.bindPopup(popup);
 
                             let color = Math.floor(Math.random() * 16777215).toString(16)
@@ -319,7 +320,7 @@
 
 
             function eeMap(geojson) {
-                payload = { "aoi": geojson }
+                payload = { "aoi": geojson, "year":year }
 
 
                 var form = document.createElement('form');
