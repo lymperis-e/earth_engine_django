@@ -253,12 +253,12 @@
                     { label: " Minimal (ESRI Gray)", layer: esri_gray },
                     { label: " Τοπογραφικός ESRI", layer: esri_topo },
                     { label: " OpenStreetMap", layer: osm },
-                    { label: "Humanitarian OpenSreetMap", layer: hum_osm },
+                    { label: " Humanitarian OpenSreetMap", layer: hum_osm },
                 ]
             }
 
             // Initialize a new layer control
-            var layerControl = L.control.layers
+            var layerControl = new L.control.layers
                 .tree(baseTree, {
                     collapsed: false,
                     closedSymbol: "<i class='fas fa-caret-right'></i>",
@@ -267,11 +267,8 @@
                     spaceSymbol: "   ",
                 })
                 .addTo(map);
-
-
-
-
             switchControlParent(layerControl, "layer-control-container", 1)
+
 
             map.fire("dataloading")
             fetch("https://geodata.gov.gr/geoserver/ows/?service=WFS&request=GetFeature&typeName=geodata.gov.gr:c7b5978b-aca9-4d74-b8a5-d3a48d02f6d0&outputFormat=application/json&srsName=epsg:4326")

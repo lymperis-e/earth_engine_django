@@ -1,9 +1,9 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView 
+from django.shortcuts import render 
 import json
 import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 
 from .call_gee import *
 
