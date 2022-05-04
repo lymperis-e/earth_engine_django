@@ -83,7 +83,7 @@
                             <a href="javascript:fetchEE('min_cloud_ndvi')"><i class="fas fa-sun"></i> NDVI on least cloudy day </a>
                         </li>
                         <li>
-                            <a href="javascript:fetchEE('max_veg_indeces')"><i class="fas fa-leaf"></i> Max NDVI, EVI, NDWI values of the year, per pixel</a>
+                            <a href="javascript:fetchEE('max_veg')"><i class="fas fa-leaf"></i> Max NDVI, EVI, NDWI values of the year, per pixel</a>
                         </li>
                         <li>
                             <a href="javascript:fetchEE('doy_max_veg')"><i class="fas fa-calendar-day"></i> Day of the year (DOY) of NDVI, EVI, NDWI maximum occurence, per pixel</a>
@@ -230,10 +230,12 @@
                 /* Get the EE layers from the backend an append them to the map*/
                 let aoi = JSON.parse('{{ feature | safe }}')
                 let year = JSON.parse('{{ year | safe }}')
-                //console.log(year)
+                
                 map.fitBounds(L.geoJSON(aoi).getBounds())
 
                 map.fire("dataloading")  // Show loader
+                document.getElementById('loading-container').style.display = 'inline-block'
+
                 fetch("{% url 'asyncEE'  %}", {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
@@ -243,7 +245,6 @@
                     .then(data => {
                         
                         let eeData = data
-                        map.fire("dataload") //Hide loader
 
                         cnt = 0
                         for (var l of Object.keys(eeData)) {
@@ -261,6 +262,11 @@
                         layerControl.setOverlayTree(overlaysTree)
                         /* Add layer count badge */
                         document.getElementById('overlays-count').innerHTML = `Earth Engine Layers&#x20; <span class="badge bg-success">${cnt}</span>`
+                        
+                        
+                        map.fire("dataload") //Hide loader
+                        document.getElementById('loading-container').style.display = 'none'
+                        
                     });
             }
 
