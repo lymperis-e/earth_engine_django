@@ -221,13 +221,8 @@
             switchControlParent(layerControl, "layer-control-container", 1)
 
             
-            // Initialize Notifications
-            var notification = L.control.notifications({
-                                            timeout: 4000,
-                                            position: 'bottomright',
-                                        })
-                                        .addTo(map);
-
+            /* Initialize Notifications */
+            var notification = L.control.notifications({ timeout: 4000, position: 'bottomright',}).addTo(map);
 
             notification.info('Loading', 'Loading area polygons. Please wait ...', {
                     timeout: 3000,
@@ -281,7 +276,7 @@
                     }).addTo(map);
 
                     notification.success('Done', `Please specify <a href="javascript:window.alert('Click on a polygon on the map to select it for analysis. Then specify the year in the popup that will appear and proceed!')"">area & year</a> an  to analyze `, {
-                                            timeout: 20000,
+                                            timeout: 9000,
                                             closable: true,
                                             dismissable: true,
                                         });

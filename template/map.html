@@ -53,6 +53,8 @@
     <link rel="stylesheet" href="{% static '/leaflet/L.Control.Layers.Tree.css'%}" />
     <link rel="stylesheet" href="{% static '/leaflet/Control.Loading.css'%}" />
     <script src="{% static '/leaflet/Control.Loading.js'%}"></script>
+    <link rel="stylesheet" href="{% static '/leaflet/leaflet-notifications.min.css'%}" />
+    <script src="{% static '/leaflet/leaflet-notifications.min.js'%}"></script>
 </head>
 
 <body>
@@ -77,7 +79,7 @@
 
             <ul class="list-unstyled components">
                 <li class="active">
-                    <a data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> Commpute</a>
+                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> Compute</a>
                     <ul class="collapse list-unstyled" id="homeSubmenu">
                         <li>
                             <a href="javascript:fetchEE('min_cloud_ndvi')"><i class="fas fa-sun"></i> NDVI on least cloudy day </a>
@@ -233,6 +235,22 @@
             switchControlParent(layerControl, "layer-control-container", 1)
             }
             
+            /* Initialize Notifications */
+            var notification = L.control.notifications({ timeout: 4000, position: 'bottomright',}).addTo(map);
+
+
+            
+            notification.info('Loading', 'Now loading RGB and false-color composites from Earth Engine. ', {
+                    timeout: 10000,
+                    className: 'important-alert',
+                });
+
+            notification.info('Info', "To add more products, open the menu 'Compute' from the sidebar on the left. Please note that Earth Engine is in alpha, and is not a production system. Services quotas are thus low, and you might experience high loading times or missing tiles frequently. In that case pan the map a bit and wait for any new response", {
+                timeout: 100000,
+                className: 'important-alert',
+            });
+
+
 
             /* Get the first EE layers: True and False color composites */
             fetchEE('composites')
