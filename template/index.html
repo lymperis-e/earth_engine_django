@@ -51,6 +51,9 @@
     <link rel="stylesheet" href="{% static '/leaflet/L.Control.Layers.Tree.css'%}" />
     <link rel="stylesheet" href="{% static '/leaflet/Control.Loading.css'%}" />
     <script src="{% static '/leaflet/Control.Loading.js'%}"></script>
+    <link rel="stylesheet" href="{% static '/leaflet/leaflet-notifications.min.css'%}" />
+    <script src="{% static '/leaflet/leaflet-notifications.min.js'%}"></script>
+
 </head>
 
 <body>
@@ -59,7 +62,7 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <h3>Earth Engine App</h3>
-                <h6 style="color:bisque">Landsat-8 Vegetation Analysis</h6>
+                <h6 style="color:bisque">Landsat-8 Yearly Analysis</h6>
             </div>
 
             <ul class="list-unstyled components">
@@ -68,60 +71,10 @@
                 </div>
             </ul>
 
-            <!--ul class="list-unstyled components">
-                <li class="active">
-                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>
-                    <ul class="collapse list-unstyled" id="homeSubmenu">
-                        <li>
-                            <a href="#">Home 1</a>
-                        </li>
-                        <li>
-                            <a href="#">Home 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Home 3</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">About</a>
-                </li>
-                <li>
-                    <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false"
-                        class="dropdown-toggle">Pages</a>
-                    <ul class="collapse list-unstyled" id="pageSubmenu">
-                        <li>
-                            <a href="#">Page 1</a>
-                        </li>
-                        <li>
-                            <a href="#">Page 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Page 3</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">Portfolio</a>
-                </li>
-                <li>
-                    <a href="#">Contact</a>
-                </li>
-            </ul>
-
-            <ul class="list-unstyled CTAs">
-            </ul--->
-
-
         </nav>
 
         <!-- Page Content  -->
         <div id="content">
-            <!--nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-                </div>
-            </nav-->
-
             <div class="" style="width:100%;height:100%">
                 <button type="button" id="sidebarCollapse" class="btn btn-info-outline"
                     style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 5px;">
@@ -267,6 +220,19 @@
                 .addTo(map);
             switchControlParent(layerControl, "layer-control-container", 1)
 
+            
+            // Initialize Notifications
+            var notification = L.control.notifications({
+                                            timeout: 4000,
+                                            position: 'bottomright',
+                                        })
+                                        .addTo(map);
+
+
+            notification.info('Loading', 'Loading area polygons. Please wait ...', {
+                    timeout: 3000,
+                    className: 'important-alert',
+                });
 
             map.fire("dataloading")
             fetch("https://geodata.gov.gr/geoserver/ows/?service=WFS&request=GetFeature&typeName=geodata.gov.gr:c7b5978b-aca9-4d74-b8a5-d3a48d02f6d0&outputFormat=application/json&srsName=epsg:4326")
@@ -313,6 +279,12 @@
 
                         }
                     }).addTo(map);
+
+                    notification.success('Done', `Please specify <a href="javascript:window.alert('Click on a polygon on the map to select it for analysis. Then specify the year in the popup that will appear and proceed!')"">area & year</a> an  to analyze `, {
+                                            timeout: 20000,
+                                            closable: true,
+                                            dismissable: true,
+                                        });
                 })
 
 
