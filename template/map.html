@@ -83,11 +83,24 @@
                             <a href="javascript:fetchEE('min_cloud_ndvi')"><i class="fas fa-sun"></i> NDVI on least cloudy day </a>
                         </li>
                         <li>
-                            <a href="javascript:fetchEE('max_veg')"><i class="fas fa-leaf"></i> Max NDVI, EVI, NDWI values of the year, per pixel</a>
+                            <a href="javascript:fetchEE('max_ndvi')"><i class="fas fa-leaf"></i> Max NDVI per pixel</a>
                         </li>
                         <li>
-                            <a href="javascript:fetchEE('doy_max_veg')"><i class="fas fa-calendar-day"></i> Day of the year (DOY) of NDVI, EVI, NDWI maximum occurence, per pixel</a>
+                            <a href="javascript:fetchEE('max_evi')"><i class="fas fa-leaf"></i> Max EVI per pixel</a>
                         </li>
+                        <li>
+                            <a href="javascript:fetchEE('max_ndwi')"><i class="fas fa-tint"></i> Max NDWI per pixel</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('doy_max_ndvi')"><i class="fas fa-calendar-day"></i> Max NDVI: Day of the year</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('doy_max_evi')"><i class="fas fa-calendar-day"></i> Max EVI: Day of the year</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('doy_max_ndwi')"><i class="fas fa-calendar-day"></i> Max NDWI: Day of the year</a>
+                        </li>
+                        
                     </ul>
                 </li>
             </ul>
@@ -259,7 +272,7 @@
 
                         layerControl.setOverlayTree(overlaysTree)
                         /* Add layer count badge */
-                        document.getElementById('overlays-count').innerHTML = `Earth Engine Layers&#x20; <span class="badge bg-success">${Object.keys(overlaysTree).length}</span>`
+                        document.getElementById('overlays-count').innerHTML = `Earth Engine Layers&#x20; <span class="badge bg-success">${overlaysTree.children.length}</span>`
                         
                         map.fire("dataload") //Hide loader
                         document.getElementById('loading-container').style.display = 'none'

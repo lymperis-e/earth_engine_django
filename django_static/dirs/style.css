@@ -90,8 +90,8 @@ a:focus {
 }
 
 #sidebar ul li a:hover {
-    color: #7386D5;
-    background: #fff;
+    color: #ffffff;
+    background: rgb(25, 88, 75);
 }
 
 #sidebar ul li.active>a {

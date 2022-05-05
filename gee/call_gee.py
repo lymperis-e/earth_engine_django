@@ -131,7 +131,7 @@ def min_cloud_ndvi (aoi, year):
     }
 
 
-def max_veg_indeces(aoi, year):
+def max_ndvi(aoi, year):
     '''
     Compute the maximum values of 3 common indices:
     NDVI, EVI, NDWI
@@ -141,78 +141,138 @@ def max_veg_indeces(aoi, year):
 
     # Map NDVI, NDWI & EVI computation functions over the whole time series
     NDVI = L8.map(computeNDVI)
-    EVI  = L8.map(computeEVI)
-    NDWI = L8.map(computeNDWI)
+
     
     #Calculate max NDVI/EVI/NDWI per pixel in the time series, via temporal reduction
     maxNDVI = NDVI.reduce(ee.Reducer.max())
-    maxEVI  = EVI.reduce(ee.Reducer.max())
-    maxNDWI = NDWI.reduce(ee.Reducer.max())
+
 
     maxNDVI_tiles = ee.Image(maxNDVI).getMapId({'bands':['ndvi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})    
-    maxEVI_tiles  = ee.Image(maxEVI).getMapId({'bands':['evi_max'],   'max': -0.5, 'min': 1, 'palette': ['red','green']})
-    maxNDWI_tiles = ee.Image(maxNDWI).getMapId({'bands':['ndwi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})
+
 
     return {
         'max_ndvi': {
             'label': 'Max NDVI/pixel ',
             'url': maxNDVI_tiles['mapid']
         },
+    }
+
+def max_evi(aoi, year):
+    '''
+    Compute the maximum values of 3 common indices:
+    NDVI, EVI, NDWI
+    '''
+    L8  = start_gee_service(aoi, year)['L8']
+    roi = start_gee_service(aoi, year)['roi']
+
+    # Map EVI computation functions over the whole time series
+    EVI  = L8.map(computeEVI)
+    
+    #Calculate max EVI per pixel in the time series, via temporal reduction
+    maxEVI  = EVI.reduce(ee.Reducer.max())
+    maxEVI_tiles  = ee.Image(maxEVI).getMapId({'bands':['evi_max'],   'max': -0.5, 'min': 1, 'palette': ['red','green']})
+
+    return {
         'max_evi': {
             'label': 'Max EVI/pixel ',
             'url': maxEVI_tiles['mapid']
         },
+    }
+
+def max_ndwi(aoi, year):
+    '''
+    Compute the maximum values of 3 common indices:
+    NDVI, EVI, NDWI
+    '''
+    L8  = start_gee_service(aoi, year)['L8']
+    roi = start_gee_service(aoi, year)['roi']
+
+    # Map  NDWI  computation functions over the whole time series
+    NDWI = L8.map(computeNDWI)
+    
+    #Calculate max NDWI per pixel in the time series, via temporal reduction
+    maxNDWI = NDWI.reduce(ee.Reducer.max())
+    maxNDWI_tiles = ee.Image(maxNDWI).getMapId({'bands':['ndwi_max'], 'max': -0.5, 'min': 1, 'palette': ['red','green']})
+
+    return {
         'max_ndwi': {
             'label': 'Max NDWI/pixel ',
             'url': maxNDWI_tiles['mapid']
         },
     }
 
-def doy_max_veg(aoi, year):
+
+
+
+
+def doy_max_ndvi(aoi, year):
     '''
     Compute the Day Of the Year (DOY) on which the
     maximum values of NDVI, EVI & NDWI occured
     '''
     L8  = start_gee_service(aoi, year)['L8']
-    roi = start_gee_service(aoi, year)['roi']
 
     # Map NDVI, NDWI & EVI computation functions over the whole time series
     NDVI = L8.map(computeNDVI)
-    EVI  = L8.map(computeEVI)
-    NDWI = L8.map(computeNDWI)
-    
-    #Calculate max NDVI/EVI/NDWI per pixel in the time series, via temporal reduction
-    maxNDVI = NDVI.reduce(ee.Reducer.max())
-    maxEVI  = EVI.reduce(ee.Reducer.max())
-    maxNDWI = NDWI.reduce(ee.Reducer.max())
-
+ 
     # Map the NDVI ImageCollection to addDate, then temporally reduce it.
-    # As the images in the collection only have one band, we can use
-    # 'qualityMosaic' equivalently to 'Reducer.max'. We opt for it for
-    # demonstrative purposes. Do the same with EVI, NDWI
     DoyMaxNdvi = NDVI.map(addDate).qualityMosaic('ndvi').select('DOY')
-    DoyMaxEvi = EVI.map(addDate).qualityMosaic('evi').select('DOY')
-    DoyMaxNdwi = NDWI.map(addDate).qualityMosaic('ndwi').select('DOY')
-
-  
-    DoyMaxNdvi = ee.Image(DoyMaxNdvi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
-    DoyMaxEvi  = ee.Image(DoyMaxEvi).getMapId({'bands':['DOY'],   'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
-    DoyMaxNdwi = ee.Image(DoyMaxNdwi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+    DoyMaxNdvi_tiles = ee.Image(DoyMaxNdvi).getMapId({'bands':['DOY'],  'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+            
 
     return {
         'doy_max_ndvi' :{
             'label':'Max NDVI: Day-of-Year',
-            'url'  : DoyMaxNdvi['mapid']
-        },
-        'doy_max_evi' :{
-            'label':'Max EVI: Day-of-Year',
-            'url'  : DoyMaxEvi['mapid']
-        },
-        'doy_max_ndwi' :{
-            'label':'Max NDWI: Day-of-Year',
-            'url'  : DoyMaxNdwi['mapid']
+            'url'  : DoyMaxNdvi_tiles['mapid']
         }
     }
+
+def doy_max_evi(aoi, year):
+    '''
+    Compute the Day Of the Year (DOY) on which the
+    maximum values of NDVI, EVI & NDWI occured
+    '''
+    L8  = start_gee_service(aoi, year)['L8']
+
+    # Map EVI computation functions over the whole time series
+    EVI  = L8.map(computeEVI)
+    
+    # Map the date from the image metadata to each pixel and
+    # calculate max EVI per pixel in the time series, via temporal reduction
+    DoyMaxEvi = EVI.map(addDate).qualityMosaic('evi').select('DOY')
+    DoyMaxEvi_tiles  = ee.Image(DoyMaxEvi).getMapId({'bands':['DOY'],   'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+       
+    return {
+        'doy_max_evi' :{
+            'label':'Max EVI: Day-of-Year',
+            'url'  : DoyMaxEvi_tiles['mapid']
+        }
+    }
+
+
+def doy_max_ndwi(aoi, year):
+    '''
+    Compute the Day Of the Year (DOY) on which the
+    maximum values of NDWI occured
+    '''
+    L8  = start_gee_service(aoi, year)['L8']
+
+    # Map EVI computation functions over the whole time series
+    NDWI  = L8.map(computeEVI)
+    
+    # Map the date from the image metadata to each pixel and
+    # calculate max EVI per pixel in the time series, via temporal reduction
+    DoyMaxNdvi = NDWI.map(addDate).qualityMosaic('evi').select('DOY')
+    DoyMaxNdwi_tiles  = ee.Image(DoyMaxNdvi).getMapId({'bands':['DOY'],   'max': 365, 'min': 1, 'palette': ['white', 'blue','green','yellow','red']})           
+
+    return {
+        'doy_max_evi' :{
+            'label':'Max EVI: Day-of-Year',
+            'url'  : DoyMaxNdwi_tiles['mapid']
+        }
+    }
+
+
 
 
 
@@ -244,7 +304,6 @@ def start_gee_service(aoi, year):
     L8.map(ee.Algorithms.Landsat.calibratedRadiance)
     L8.map(ee.Algorithms.Landsat.TOA)
 
-
     return {
             'L8': L8,
             'roi': roi
@@ -252,53 +311,3 @@ def start_gee_service(aoi, year):
 
 
 
-
-
-
-
-
-
-
-
-    
-    
-
-    return {
-        'min_cloud_tc': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: True Color Composite',
-            'url': minCloud_TC_tiles['mapid']
-        },
-        'min_cloud_fc': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: False Color Composite',
-            'url': minCloud_FC_tiles['mapid']
-        },
-        'min_cloud_ndvi': {
-            'label': 'Landsat 8, Minimum Cloud Coverage: NDVI',
-            'url': minCloud_NDVI_tiles['mapid']
-        },
-        'max_ndvi': {
-            'label': 'Max NDVI/pixel ',
-            'url': maxNDVI_tiles['mapid']
-        },
-        'max_evi': {
-            'label': 'Max EVI/pixel ',
-            'url': maxEVI_tiles['mapid']
-        },
-        'max_ndwi': {
-            'label': 'Max NDWI/pixel ',
-            'url': maxNDWI_tiles['mapid']
-        },
-        'doy_max_ndvi' :{
-            'label':'Max NDVI: Day-of-Year',
-            'url'  : DoyMaxNdvi['mapid']
-        },
-        'doy_max_evi' :{
-            'label':'Max EVI: Day-of-Year',
-            'url'  : DoyMaxEvi['mapid']
-        },
-        'doy_max_ndwi' :{
-            'label':'Max NDWI: Day-of-Year',
-            'url'  : DoyMaxNdwi['mapid']
-        }
-        
-    }
