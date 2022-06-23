@@ -145,7 +145,7 @@
                     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 maxZoom: 26,
                 maxNativeZoom: 20,
-            });
+            }).addTo(map);;
             const esri_world = L.tileLayer(
                 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
                 {
@@ -154,7 +154,7 @@
                     maxZoom: 26,
                     maxNativeZoom: 17,
                 }
-            ).addTo(map);
+            );
             const google_sat = L.tileLayer(
                 "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
                 {
@@ -243,7 +243,7 @@
                                             <h6>Year:&#x20;&#x20;</h6>
                                             <input type="text" class="yearpicker form-control" value="" style="font-size: x-small;width: 60px;height: 20px;">
                                         </div>
-                                        <div class='row' style='justify-content: center;margin-top: 15px;margin-bottom: 15px;'>
+                                        <div class='row' style='justify-content: center;'>
                                             <button class="btn btn-sm" onclick='openMap(${JSON.stringify(feature)})'>
                                                 <i class="fas fa-satellite"></i>&nbsp;&nbsp; Earth Engine Data
                                             </button>

@@ -15,7 +15,7 @@ SECRET_KEY = '&b_rrh(@gw(u@gec%a@+p6*gwk3m)rr(mt=uj=i)&=e#e^5-%2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['earth.elymperis.com']
 
 
 # Application definition
