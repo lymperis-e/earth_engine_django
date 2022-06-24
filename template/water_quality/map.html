@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Earth Engine App</title>
+
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+        integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <!-- Our Custom CSS -->
+    <link rel="stylesheet" href="{% static '/style.css'%}">
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" integrity="sha512-Tn2m0TIpgVyTzzvmxLNuqbSJH3JP8jm+Cy3hvHrW7ndTDcJ1w5mBiksqDBb8GpE2ksktFvDB/ykZ0mDpsZj20w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+        }
+
+        #map-container {
+            position: relative;
+            /*width: 100vw;*/
+            height: 100%;
+            left: 0.0%;
+            top: 0.0%;
+        }
+
+        .leaflet-control-layers-separator {
+            border-top: none !important;
+        }
+    </style>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+    <!--Custom Leaflet CSS-->
+    <link rel="stylesheet" href="{% static '/leaflet/leaflet.css'%}" />
+
+    <script src="{% static '/leaflet/L.Control.Layers.Tree.js'%}">
+    </script>
+    <link rel="stylesheet" href="{% static '/leaflet/L.Control.Layers.Tree.css'%}" />
+    <link rel="stylesheet" href="{% static '/leaflet/Control.Loading.css'%}" />
+    <script src="{% static '/leaflet/Control.Loading.js'%}"></script>
+    <link rel="stylesheet" href="{% static '/leaflet/leaflet-notifications.min.css'%}" />
+    <script src="{% static '/leaflet/leaflet-notifications.min.js'%}"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar  -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-globe"></i> Earth Engine App</h3>
+                <h6 style="color:bisque">Landsat-8 Yearly Analysis | <span style="color:teal" id="title-year">2021</span></h6>
+            </div>
+            
+            <div>
+                
+            </div>
+
+            <ul class="list-unstyled components">
+                <h6 style="margin-left:10px;"> Map Layers</h6>
+                <div id="layer-control-container" style="font-size: small;
+                margin-left:10px;">
+                </div>
+            </ul>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> Compute</a>
+                    <ul class="collapse list-unstyled" id="homeSubmenu">
+                        <li>
+                            <a href="javascript:fetchEE('min_cloud_ndvi')"><i class="fas fa-sun"></i> NDVI on least cloudy day </a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('max_ndvi')"><i class="fas fa-leaf"></i> Max NDVI per pixel</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('max_evi')"><i class="fas fa-leaf"></i> Max EVI per pixel</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('max_ndwi')"><i class="fas fa-tint"></i> Max NDWI per pixel</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('doy_max_ndvi')"><i class="fas fa-calendar-day"></i> Max NDVI: Day of the year</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('doy_max_evi')"><i class="fas fa-calendar-day"></i> Max EVI: Day of the year</a>
+                        </li>
+                        <li>
+                            <a href="javascript:fetchEE('doy_max_ndwi')"><i class="fas fa-calendar-day"></i> Max NDWI: Day of the year</a>
+                        </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+
+        </nav>
+
+        <!-- Page Content  -->
+        <div id="content">
+            <div class="" style="width:100%;height:100%">
+                <button type="button" id="sidebarCollapse" class="btn btn-info-outline"
+                    style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 5px;">
+                    <i class="fas fa-align-left"></i>
+                    <span></span>
+                </button>
+                <div style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 50px;" id="loader-container">
+                </div>
+                <div style="z-index: 1001;position:absolute;margin-left: 5px;margin-top: 50px;" id="loading-container">
+                    <img src="/static/img/eclipse_loader.svg" height="40">
+                </div>
+
+                <div class="" id="map-container"></div>
+            </div>
+        </div>
+
+        <!-- jQuery CDN - Slim version (=without AJAX) -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+        <!-- Popper.JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+            integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+            crossorigin="anonymous"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
+            integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+            crossorigin="anonymous"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('#sidebarCollapse').on('click', function () {
+                    $('#sidebar').toggleClass('active');
+                });
+            });
+        </script>
+
+        <script>
+
+            document.getElementById('title-year').innerHTML = JSON.parse('{{ year | safe }}')
+
+            /* Initialize Map*/
+            var map = L.map(
+                "map-container",
+                {
+                    center: [37.63424498161601, 22.754573960700434],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 12,
+                    zoomControl: false,
+                    preferCanvas: false,
+                }
+            )
+
+            zoomControl = L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+            /* Add custom classes to display as Bootstrap buttons*/
+            zoomControl.getContainer().classList.add("btn-group-vertical");
+            zoomControl.getContainer().children[0].classList.add("btn");
+            zoomControl.getContainer().children[1].classList.add("btn");
+
+
+            var loader =  L.Control.loading({
+                position: 'topright',
+                //zoomControl: true
+            }).addTo(map)
+            switchControlParent(loader, 'loader-container', 0)
+
+            /* Basemap Layers */
+            const baseTree = {
+                label: "<b> Basemaps </b>",
+                children: [
+                    {
+                        label: "&#x20;Humanitarion Open Street Map", layer: L.tileLayer(
+                            "http://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                            { "attribution": '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "tms": false }
+                        ).addTo(map)
+                    },
+                    {
+                        label: "&#x20;ESRI World Imagery", layer: L.tileLayer(
+                            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{
+                                "attribution":'ESRI World Imagery <a href="https://esri.maps.arcgis.com/home/index.html" target="_blank">(c) Esri, Maxar, Earthstar Geographics, USDA FSA, USGS, Aerogrid, IGN, IGP, and the GIS User Community</a>',  maxZoom: 26, maxNativeZoom: 17,
+                    }
+                        )
+                    },
+                    {
+                        label: "&#x20;OpenStreetMap", layer: L.tileLayer(
+                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            { "attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false }
+                        ).addTo(map)
+                    }
+                ]
+            }
+
+
+            /* Overlay Layers */
+            var overlaysTree = {
+                label: "<b id='overlays-count'> Earth Engine Layers </b>",
+                selectAllCheckbox: "",
+                children: [],
+            }
+
+
+            /* Add layer tree control */
+            // Initialize a new layer control
+            try {
+                document.getElementsByClassName("leaflet-control-layers ")[0].remove()
+            }
+            catch{
+                null
+            }
+            finally{
+                var layerControl = new L.control.layers
+                        .tree(baseTree, overlaysTree, {
+                            collapsed: true,
+                            closedSymbol: "<i class='fas fa-caret-right'></i>",
+                            openedSymbol: "<i class='fas fa-caret-down'></i>",
+                            labelIsSelector: "none",
+                            spaceSymbol: "   ",
+                        })
+                        .addTo(map);
+            switchControlParent(layerControl, "layer-control-container", 1)
+            }
+            
+            /* Initialize Notifications */
+            var notification = L.control.notifications({ timeout: 4000, position: 'bottomright',}).addTo(map);
+
+
+            
+            notification.info('Loading', 'Now loading RGB and false-color composites from Earth Engine. ', {
+                    timeout: 10000,
+                    className: 'important-alert',
+                });
+
+            notification.info('Info', "To add more products, open the menu 'Compute' from the sidebar on the left. Please note that Earth Engine is in alpha, and is not a production system. Services quotas are thus low, and you might experience high loading times or missing tiles frequently. In that case pan the map a bit and wait for any new response", {
+                timeout: 100000,
+                className: 'important-alert',
+            });
+
+
+
+            /* Get the first EE layers: True and False color composites */
+            fetchEE('ndci')
+
+
+
+            function fetchEE(layers) {
+                /* Get the EE layers from the backend an append them to the map*/
+                let aoi = JSON.parse('{{ feature | safe }}')
+                let year = JSON.parse('{{ year | safe }}')
+                
+                map.fitBounds(L.geoJSON(aoi).getBounds())
+
+                map.fire("dataloading")  // Show loader
+                document.getElementById('loading-container').style.display = 'inline-block'
+
+                fetch("{% url 'water_quality_asyncEE'  %}", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ "aoi": aoi, "year": year, "layers": layers}),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        
+                        let eeData = data
+
+                        for (var l of Object.keys(eeData)) {
+                            let eeLayer = eeData[l]
+
+                            let layer_HTMLtag = `&#x20;${eeLayer.label}`
+                            let leafLayer = new L.tileLayer(
+                                `https://earthengine.googleapis.com/v1alpha/${eeLayer.url}/tiles/{z}/{x}/{y}`,
+                                { "attribution": "Google Earth Engine", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false }
+                            ).addTo(map);
+                            overlaysTree.children.push({ label: layer_HTMLtag, layer: leafLayer });
+                        }
+
+                        layerControl.setOverlayTree(overlaysTree)
+                        /* Add layer count badge */
+                        document.getElementById('overlays-count').innerHTML = `Earth Engine Layers&#x20; <span class="badge bg-success">${overlaysTree.children.length}</span>`
+                        
+                        map.fire("dataload") //Hide loader
+                        document.getElementById('loading-container').style.display = 'none'
+                        
+                    });
+            }
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+            function switchControlParent(leafletControl, parentElementId, elementPosition) {
+                let htmlObject = leafletControl.getContainer().children[elementPosition];
+                let oldParent = htmlObject.parentElement
+                let a = document.getElementById(parentElementId);
+                function setParent(el, newParent) {
+                    newParent.appendChild(el);
+                }
+                setParent(htmlObject, a);
+                oldParent.remove()
+            }
+        </script>
+</body>
+
+</html>
