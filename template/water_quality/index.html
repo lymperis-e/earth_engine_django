@@ -243,7 +243,8 @@
                 });
 
             map.fire("dataloading")
-            fetch("https://geodata.gov.gr/geoserver/ows/?service=WFS&request=GetFeature&typeName=geodata.gov.gr:c9018d5e-93f1-47bb-a62d-3b86a6518ec4&outputFormat=application/json&srsName=epsg:4326")
+            //https://geodata.gov.gr/geoserver/ows/?service=WFS&request=GetFeature&typeName=geodata.gov.gr:c9018d5e-93f1-47bb-a62d-3b86a6518ec4&outputFormat=application/json&srsName=epsg:4326
+            fetch("http://localhost:8000/static/data/water_gr.json")
                 .then(response => response.json())
                 .then(data => {
                     map.fire("dataload")
@@ -251,7 +252,7 @@
                         onEachFeature: function (feature, layer) {
                             let popup = L.popup()
                                         .setContent(`
-                                    <h4>Δήμος ${feature.properties.NAME}</h4>
+                                    <h4> ${feature.properties.name}</h4>
                                     <div class='row' style='justify-content: center;margin-top: 10px;'>
                                             <h6>Year:&#x20;&#x20;</h6>
                                             <input type="text" class="yearpicker form-control" value="" style="font-size: x-small;width: 60px;height: 20px;">

@@ -318,7 +318,7 @@ def start_gee_service(aoi, year):
 
 
 def copernicus_ndci(aoi, year):
-    title = aoi['properties']['NAME']
+    title = aoi['properties']['name']
     polygon = aoi['geometry']['coordinates']
   
     
@@ -334,16 +334,29 @@ def copernicus_ndci(aoi, year):
             .first()
           )
 
-    ndci = compute_ndci(L8)
+    raw_tiles   = ee.Image(L8).getMapId({ 'bands': ['B4', 'B3', 'B2'], 'max':  3500, min:0} ) 
+
+    water = water_mask(L8)
+    ndci = compute_ndci(water)
     ndci_tiles  = ee.Image(ndci).getMapId({'bands':['NDCI'],   'max': 0.4, 'min': 0.1, 'palette': ['cyan','orange','red']})           
 
     return {
-        'doy_max_evi' :{
+        'rgb' :{
+            'label':'Raw RGB',
+            'url'  : raw_tiles['mapid']
+        },
+        'ndci' :{
             'label':'NDCI',
             'url'  : ndci_tiles['mapid']
         }
     }
    
+
+def water_mask(image):
+    ndwi = image.normalizedDifference(['B3', 'B8']).rename('NDWI')
+    return ( image.addBands(ndwi)
+                .updateMask(ndwi.gt(0))
+                )
 
 def compute_ndci(image):
     ndci = image.normalizedDifference(['B5', 'B4']).rename('NDCI')
